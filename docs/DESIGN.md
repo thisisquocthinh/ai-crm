@@ -45,7 +45,7 @@ Công cụ cá nhân giúp tư vấn bán hàng online: gộp tin nhắn **Fanpa
 |---|---|
 | Frontend | Next.js (App Router) + Tailwind, PWA |
 | Backend | Next.js route handlers + 1 worker Node (Zalo listener) |
-| DB | PostgreSQL (Prisma ORM) |
+| DB | SQLite (Prisma ORM); chuyển PostgreSQL khi cần mở rộng |
 | Realtime | Server-Sent Events |
 | Thông báo | Web Push (VAPID) |
 | AI | Claude API |
@@ -53,10 +53,11 @@ Công cụ cá nhân giúp tư vấn bán hàng online: gộp tin nhắn **Fanpa
 
 ## 4. Mô hình dữ liệu (sơ bộ)
 
-- `Contact` – id, channel (`facebook`/`zalo`), externalId, displayName, avatar, phone, status (`moi`, `dang_tu_van`, `hen_ghe`, `da_chot`, `khong_mua`), note, followUpAt
-- `Conversation` – id, contactId, lastMessageAt, unreadCount
-- `Message` – id, conversationId, direction (`in`/`out`), text, attachments, externalId, sentAt
-- `Product` – id, code (mã), name, price, salePrice, note, active, updatedAt
+Xem chi tiết ở `web/prisma/schema.prisma`.
+
+- `Contact` – một danh tính trên một kênh kèm hội thoại: channel (`facebook`/`zalo`), externalId, name, phone, stage (`moi`, `dang_tu_van`, `hen_ghe`, `da_chot`, `khong_mua`), note, followUpAt, unread, lastMessageAt
+- `Message` – contactId, direction (`in`/`out`), text, externalId, sentAt
+- `Product` – code (mã, duy nhất), name, category, price, salePrice, note
 - `ContactProduct` – sản phẩm khách quan tâm
 
 ## 5. Nút "Gợi ý AI"
@@ -73,7 +74,7 @@ Công cụ cá nhân giúp tư vấn bán hàng online: gộp tin nhắn **Fanpa
 
 ## 7. Lộ trình
 
-1. **M1 – Khung dự án:** Next.js + Prisma + đăng nhập 1 người dùng + Docker Compose.
+1. **M1 – Khung dự án + lưu dữ liệu (SQLite):** ✅ giao diện, sản phẩm, khách hàng, trạng thái, follow-up. Còn lại: đăng nhập, Docker.
 2. **M2 – Facebook:** webhook, lưu tin, gửi tin, hộp thư realtime.
 3. **M3 – Zalo:** adapter `zca-js`, đăng nhập QR, nhận/gửi tin.
 4. **M4 – Thông báo đẩy + PWA.**

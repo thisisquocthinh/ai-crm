@@ -1,0 +1,72 @@
+// Dùng SQLite khi chạy cá nhân. Muốn chuyển sang PostgreSQL: đổi provider + DATABASE_URL,
+// rồi tạo lại migration. Tránh dùng tính năng chỉ SQLite mới có.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Một khách = một danh tính trên một kênh (Fanpage hoặc Zalo), kèm toàn bộ hội thoại.
+model Contact {
+  id            String    @id @default(cuid())
+  channel       String // "facebook" | "zalo"
+  externalId    String? // PSID của Facebook hoặc userId của Zalo
+  name          String
+  phone         String?
+  stage         String    @default("moi") // moi | dang_tu_van | hen_ghe | da_chot | khong_mua
+  note          String?
+  followUpAt    DateTime?
+  hue           Int       @default(210)
+  unread        Int       @default(0)
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  messages  Message[]
+  interests ContactProduct[]
+
+  @@unique([channel, externalId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  contactId  String
+  direction  String // "in" (khách gửi) | "out" (mình gửi)
+  text       String
+  externalId String?
+  sentAt     DateTime @default(now())
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId, sentAt])
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  category  String
+  price     Int // VND
+  salePrice Int?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  interests ContactProduct[]
+}
+
+model ContactProduct {
+  contactId String
+  productId String
+  createdAt DateTime @default(now())
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, productId])
+}
