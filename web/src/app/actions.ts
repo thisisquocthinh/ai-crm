@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { CHANNELS, STAGES, type Channel, type Stage } from "@/lib/types";
+import { logoutZalo, reconnectZalo, sendZaloText, startQRLogin } from "@/server/zalo";
 
 export type ActionResult = { ok: true } | { ok: false, error: string };
 
@@ -106,14 +107,43 @@ export async function setInterest(contactId: string, productId: string, on: bool
 
 /* ---------- Tin nhắn ---------- */
 
-// Hiện chỉ lưu vào database. Bước 3–4 sẽ gửi thật qua Zalo/Facebook.
+// Khách Zalo có mã Zalo: gửi thật qua Zalo. Còn lại (Facebook chưa kết nối, khách
+// thêm tay) chỉ lưu vào database.
 export async function sendMessage(contactId: string, text: string): Promise<ActionResult> {
   const body = text.trim();
   if (!body) return { ok: false, error: "Tin nhắn trống" };
+  const contact = await db.contact.findUnique({ where: { id: contactId } });
+  if (!contact) return { ok: false, error: "Không tìm thấy khách" };
+
   const now = new Date();
-  await db.$transaction([
-    db.message.create({ data: { contactId, direction: "out", text: body, sentAt: now } }),
-    db.contact.update({ where: { id: contactId }, data: { lastMessageAt: now } }),
-  ]);
+  // Lưu trước khi gửi để tin phản hồi từ Zalo (selfListen) không bị tạo trùng.
+  const msg = await db.message.create({ data: { contactId, direction: "out", text: body, sentAt: now } });
+  if (contact.channel === "zalo" && contact.externalId) {
+    try {
+      const externalId = await sendZaloText(contact.externalId, body);
+      await db.message.updateMany({ where: { id: msg.id, externalId: null }, data: { externalId } });
+    } catch (e) {
+      await db.message.delete({ where: { id: msg.id } });
+      return { ok: false, error: e instanceof Error ? e.message : "Gửi Zalo thất bại" };
+    }
+  }
+  await db.contact.update({ where: { id: contactId }, data: { lastMessageAt: now, unread: 0 } });
   return done();
+}
+
+/* ---------- Kết nối Zalo ---------- */
+
+export async function zaloLogin(): Promise<ActionResult> {
+  await startQRLogin();
+  return { ok: true };
+}
+
+export async function zaloReconnect(): Promise<ActionResult> {
+  await reconnectZalo();
+  return { ok: true };
+}
+
+export async function zaloLogout(): Promise<ActionResult> {
+  await logoutZalo();
+  return { ok: true };
 }

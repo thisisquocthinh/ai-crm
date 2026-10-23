@@ -20,7 +20,7 @@ export function Pipeline({ contacts, products, onOpen, onNewContact }: {
         <div className="mb-5 flex items-center gap-3">
           <h2 className="text-lg font-semibold">Khách đang theo dõi</h2>
           <div className="ml-2 hidden -space-x-2 sm:flex">
-            {contacts.slice(0, 6).map((c) => <Avatar key={c.id} name={c.name} hue={c.hue} className="size-9 text-xs ring-2 ring-white" />)}
+            {contacts.slice(0, 6).map((c) => <Avatar key={c.id} name={c.name} src={c.avatarUrl} hue={c.hue} className="size-9 text-xs ring-2 ring-white" />)}
           </div>
           <button onClick={onNewContact} className="round-btn ml-auto size-11" aria-label="Thêm khách"><Plus className="size-5" /></button>
         </div>
@@ -33,7 +33,7 @@ export function Pipeline({ contacts, products, onOpen, onNewContact }: {
                   {items.map((c) => (
                     <button key={c.id} onClick={() => onOpen(c.id)}
                       className="tile flex items-center gap-3 rounded-[20px] p-3 text-left hover:bg-white">
-                      <Avatar name={c.name} hue={c.hue} channel={c.channel} className="size-10" />
+                      <Avatar name={c.name} src={c.avatarUrl} hue={c.hue} channel={c.channel} className="size-10" />
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold">{c.name}</div>
                         <div className="truncate text-xs text-slate-500">{productName(c.productIds[0])}</div>
@@ -64,7 +64,7 @@ export function Pipeline({ contacts, products, onOpen, onNewContact }: {
               return (
                 <li key={c.id}>
                   <button onClick={() => onOpen(c.id)} className="tile flex w-full items-center gap-3 rounded-[20px] p-3 text-left hover:bg-white">
-                    <Avatar name={c.name} hue={c.hue} channel={c.channel} className="size-10" />
+                    <Avatar name={c.name} src={c.avatarUrl} hue={c.hue} channel={c.channel} className="size-10" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold">{c.name}</div>
                       <div className="truncate text-xs text-slate-500">{c.note ?? productName(c.productIds[0])}</div>

@@ -17,6 +17,7 @@ model Contact {
   externalId    String? // PSID của Facebook hoặc userId của Zalo
   name          String
   phone         String?
+  avatarUrl     String?
   stage         String    @default("moi") // moi | dang_tu_van | hen_ghe | da_chot | khong_mua
   note          String?
   followUpAt    DateTime?
@@ -69,4 +70,11 @@ model ContactProduct {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@id([contactId, productId])
+}
+
+// Cài đặt dạng key/value, ví dụ phiên đăng nhập Zalo.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }

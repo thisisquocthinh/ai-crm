@@ -15,6 +15,8 @@ export type ContactDTO = {
   name: string;
   channel: Channel;
   phone: string | null;
+  externalId: string | null;
+  avatarUrl: string | null;
   stage: Stage;
   note: string | null;
   followUpAt: string | null;

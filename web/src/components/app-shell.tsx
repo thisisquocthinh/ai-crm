@@ -1,21 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { BarChart3, Bell, CalendarClock, Layers, MessageCircle, Package, Plus, Search, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { BarChart3, Bell, CalendarClock, Layers, MessageCircle, Package, Plug, Plus, Search, Users } from "lucide-react";
 import { markRead } from "@/app/actions";
 import type { ContactDTO, ProductDTO } from "@/lib/types";
+import { Connections } from "./connections";
 import { Inbox, NewContactForm } from "./inbox";
 import { Pipeline, Reports } from "./overview";
 import { Products } from "./products";
 import { Avatar } from "./ui";
 
-type View = "inbox" | "customers" | "products" | "reports";
+type View = "inbox" | "customers" | "products" | "reports" | "connections";
 
 const NAV: { id: View; label: string; icon: typeof MessageCircle }[] = [
   { id: "inbox", label: "Hộp thư", icon: MessageCircle },
   { id: "customers", label: "Khách hàng", icon: Users },
   { id: "products", label: "Sản phẩm", icon: Package },
   { id: "reports", label: "Báo cáo", icon: BarChart3 },
+  { id: "connections", label: "Kết nối", icon: Plug },
 ];
 
 const TITLES: Record<View, string> = {
@@ -23,13 +26,36 @@ const TITLES: Record<View, string> = {
   customers: "Hành trình khách hàng",
   products: "Danh mục sản phẩm",
   reports: "Báo cáo",
+  connections: "Kết nối kênh",
 };
+
+// Khi server báo có tin mới, tải lại dữ liệu trang (không mất trạng thái giao diện).
+function useLiveUpdates() {
+  const router = useRouter();
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const es = new EventSource("/api/events");
+    es.onmessage = (e) => {
+      if (JSON.parse(e.data).type !== "data") return;
+      clearTimeout(timer);
+      timer = setTimeout(() => router.refresh(), 150);
+    };
+    return () => { clearTimeout(timer); es.close(); };
+  }, [router]);
+}
 
 export default function AppShell({ contacts, products }: { contacts: ContactDTO[]; products: ProductDTO[] }) {
   const [view, setView] = useState<View>("inbox");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [addingContact, setAddingContact] = useState(false);
   const totalUnread = contacts.reduce((s, c) => s + c.unread, 0);
+  useLiveUpdates();
+
+  // Tin mới đến hội thoại đang mở thì coi như đã đọc.
+  const openUnread = view === "inbox" && contacts.find((c) => c.id === selectedId)?.unread;
+  useEffect(() => {
+    if (openUnread && selectedId) markRead(selectedId);
+  }, [openUnread, selectedId]);
 
   const open = (id: string) => {
     setSelectedId(id);
@@ -55,6 +81,7 @@ export default function AppShell({ contacts, products }: { contacts: ContactDTO[
           )}
           {view === "products" && <Products products={products} />}
           {view === "reports" && <Reports contacts={contacts} />}
+          {view === "connections" && <Connections />}
         </main>
       </div>
 

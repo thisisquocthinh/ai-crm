@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { X } from "lucide-react";
 import type { ActionResult } from "@/app/actions";
 import { initials } from "@/lib/format";
@@ -18,13 +18,17 @@ export function useRun() {
   return [pending, run] as const;
 }
 
-export function Avatar({ name, hue, channel, className = "" }: {
-  name: string; hue: number; channel?: Channel; className?: string;
+export function Avatar({ name, hue, channel, src, className = "" }: {
+  name: string; hue: number; channel?: Channel; src?: string | null; className?: string;
 }) {
+  const [broken, setBroken] = useState(false);
   return (
     <span className={`relative inline-grid shrink-0 place-items-center rounded-full text-sm font-semibold text-white ${className}`}
       style={{ background: `linear-gradient(135deg, hsl(${hue} 70% 62%), hsl(${hue + 30} 65% 45%))` }}>
-      {initials(name)}
+      {src && !broken
+        // eslint-disable-next-line @next/next/no-img-element -- ảnh từ máy chủ Zalo, không qua tối ưu ảnh của Next
+        ? <img src={src} alt="" referrerPolicy="no-referrer" onError={() => setBroken(true)} className="absolute inset-0 size-full rounded-full object-cover" />
+        : initials(name)}
       {channel && (
         <span className={`absolute -bottom-0.5 -right-0.5 grid size-[18px] place-items-center rounded-full text-[8px] font-bold ring-2 ring-white ${
           channel === "facebook" ? "bg-blue-600" : "bg-sky-500"}`}>

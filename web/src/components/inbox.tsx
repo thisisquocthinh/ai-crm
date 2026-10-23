@@ -60,7 +60,7 @@ export function Inbox({ contacts, products, selectedId, onOpen, onBack, onNewCon
                 <button onClick={() => onOpen(c.id)}
                   className={`flex w-full items-center gap-3 rounded-[22px] p-3 text-left transition ${
                     active ? "bg-black text-white" : "tile hover:bg-white"}`}>
-                  <Avatar name={c.name} hue={c.hue} channel={c.channel} className="size-11" />
+                  <Avatar name={c.name} src={c.avatarUrl} hue={c.hue} channel={c.channel} className="size-11" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-sm font-semibold">{c.name}</span>
@@ -144,7 +144,7 @@ function Chat({ contact, products, onBack, onInfo }: {
     <section className="glass flex min-h-0 min-w-0 flex-1 flex-col rounded-[28px]">
       <div className="flex items-center gap-3 border-b border-white/70 p-3 md:p-4">
         <button onClick={onBack} className="round-btn size-10 md:hidden" aria-label="Quay lại"><ChevronLeft className="size-5" /></button>
-        <Avatar name={contact.name} hue={contact.hue} channel={contact.channel} className="size-11" />
+        <Avatar name={contact.name} src={contact.avatarUrl} hue={contact.hue} channel={contact.channel} className="size-11" />
         <div className="min-w-0">
           <div className="truncate font-semibold">{contact.name}</div>
           <div className="text-xs text-slate-500">{contact.channel === "facebook" ? "Fanpage Facebook" : "Zalo cá nhân"}</div>
@@ -172,6 +172,12 @@ function Chat({ contact, products, onBack, onInfo }: {
           ))}
         </div>
       </div>
+
+      {!(contact.channel === "zalo" && contact.externalId) && (
+        <p className="mx-3 mb-1 rounded-full bg-amber-50/80 px-3 py-1.5 text-center text-[11px] text-amber-800">
+          {contact.channel === "facebook" ? "Facebook chưa kết nối" : "Khách thêm tay, chưa liên kết Zalo"}: tin gửi chỉ được lưu trong app
+        </p>
+      )}
 
       {suggestions && (
         <div className="space-y-2 px-3 pb-2">
@@ -232,7 +238,7 @@ function CustomerPanel({ contact, products, onDeleted }: {
     <div className="space-y-4">
       <div className="glass rounded-[28px] p-5">
         <div className="text-center">
-          <Avatar name={f.name || contact.name} hue={contact.hue} channel={contact.channel} className="mx-auto size-16 text-lg" />
+          <Avatar name={f.name || contact.name} src={contact.avatarUrl} hue={contact.hue} channel={contact.channel} className="mx-auto size-16 text-lg" />
           {contact.followUpAt && (
             <p className="mt-2 flex items-center justify-center gap-1.5 text-xs font-medium text-rose-600">
               <CalendarClock className="size-3.5" /> Follow-up: {formatFollowUp(contact.followUpAt)}

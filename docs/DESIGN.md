@@ -76,7 +76,7 @@ Xem chi tiết ở `web/prisma/schema.prisma`.
 
 1. **M1 – Khung dự án + lưu dữ liệu (SQLite):** ✅ giao diện, sản phẩm, khách hàng, trạng thái, follow-up. Còn lại: đăng nhập, Docker.
 2. **M2 – Facebook:** webhook, lưu tin, gửi tin, hộp thư realtime.
-3. **M3 – Zalo:** adapter `zca-js`, đăng nhập QR, nhận/gửi tin.
+3. **M3 – Zalo:** ✅ adapter `zca-js` (`web/src/server/zalo.ts`), đăng nhập QR, nhận/gửi tin 1-1, cập nhật realtime qua SSE.
 4. **M4 – Thông báo đẩy + PWA.**
 5. **M5 – Danh mục sản phẩm + nút Gợi ý AI.**
 6. **M6 – Hồ sơ khách, trạng thái, nhắc follow-up.**

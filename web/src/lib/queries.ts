@@ -16,6 +16,8 @@ export async function loadData(): Promise<{ contacts: ContactDTO[]; products: Pr
       name: c.name,
       channel: c.channel as Channel,
       phone: c.phone,
+      externalId: c.externalId,
+      avatarUrl: c.avatarUrl,
       stage: c.stage as Stage,
       note: c.note,
       followUpAt: c.followUpAt?.toISOString() ?? null,
